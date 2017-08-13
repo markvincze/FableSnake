@@ -3,6 +3,7 @@
     <TargetFramework>netstandard1.6</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Engine.fs" />
     <Compile Include="App.fs" />
   </ItemGroup>
   <ItemGroup>
