@@ -39,10 +39,10 @@ let initialState = (
 
 let move direction (x, y) =
     match direction with
-    | Up -> x, y - 1
-    | Right -> x + 1, y
-    | Down -> x, y + 1
-    | Left -> x - 1, y
+    | Up -> x, if y > 0 then y - 1 else mapWidth - 1
+    | Right -> (if x < mapWidth - 1 then x + 1 else 0), y
+    | Down -> x, if y < mapHeight - 1 then y + 1 else 0
+    | Left -> (if x > 0 then x - 1 else mapHeight - 1), y
 
 let opposite dir =
     match dir with
@@ -53,17 +53,12 @@ let opposite dir =
 
 let changeDirection newDir (gameState, controlState) =
     let (point, dir) = gameState.Snake.Head
-    
+
     // Can't turn 180 degrees
     let newDir =
-        if newDir = opposite dir
+        if move newDir point = fst gameState.Snake.Tail.Head
         then dir
         else newDir
-    
-    // let newDir =
-    //     if List.forall (fun (p, _) -> p <> (move newDir point)) gameState.Snake.Tail
-    //     then newDir
-    //     else dir
 
     ({ gameState with Snake = { gameState.Snake with Head = (point, newDir) } },
      { controlState with Direction = newDir })

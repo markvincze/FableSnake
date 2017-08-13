@@ -5,32 +5,55 @@ open Fable.Core.JsInterop
 open Fable.Import
 open Engine
 
-let blockSize = 20
-let mapWidthPixel = Engine.mapWidth * blockSize |> float
-let mapHeightPixel = Engine.mapHeight * blockSize |> float
+let blockSize = 20.
+let mapWidthPixel = float(Engine.mapWidth) * blockSize
+let mapHeightPixel = float(Engine.mapHeight) * blockSize
 
 let render (ctx : Browser.CanvasRenderingContext2D) (gameState, controlState) =
     ctx.clearRect(0., 0., mapWidthPixel, mapHeightPixel)
     ctx.fillStyle <- !^"rgb(200,0,0)"
     ctx.fillRect (
-        (gameState.Objective |> fst) * blockSize |> float,
-        (gameState.Objective |> snd) * blockSize |> float,
+        float(gameState.Objective |> fst) * blockSize,
+        float(gameState.Objective |> snd) * blockSize,
         float(blockSize),
         float(blockSize)
     )
-    
+
     let renderSnakeBlock (x, y) =
         ctx.fillStyle <- !^"rgb(0,0,200)"
         ctx.fillRect (
-            x * blockSize |> float,
-            y * blockSize |> float,
+            float(x) * blockSize,
+            float(y) * blockSize,
             float(blockSize),
             float(blockSize)
         )
-    
+
     gameState.Snake.Head :: gameState.Snake.Tail
     |> List.map fst
     |> List.iter renderSnakeBlock
+
+    // Render a triangle for the head
+    let (x, y), headDir = gameState.Snake.Head
+    ctx.fillStyle <- !^"rgb(0, 200, 0)"
+    ctx.beginPath()
+    match headDir with
+    | Up ->
+        ctx.moveTo(float(x) * blockSize, (float(y) + 0.5) * blockSize)
+        ctx.lineTo((float(x) + 0.5) * blockSize, float(y) * blockSize)
+        ctx.lineTo((float(x) + 1.) * blockSize, (float(y) + 0.5) * blockSize)
+    | Right ->
+        ctx.moveTo((float(x) + 0.5) * blockSize, float(y) * blockSize)
+        ctx.lineTo((float(x) + 1.) * blockSize, (float(y) + 0.5) * blockSize)
+        ctx.lineTo((float(x) + 0.5) * blockSize, (float(y) + 1.) * blockSize)
+    | Down ->
+        ctx.moveTo(float(x) * blockSize, (float(y) + 0.5) * blockSize)
+        ctx.lineTo((float(x) + 0.5) * blockSize, (float(y) + 1.) * blockSize)
+        ctx.lineTo((float(x) + 1.) * blockSize, (float(y) + 0.5) * blockSize)
+    | Left ->
+        ctx.moveTo((float(x) + 0.5) * blockSize, float(y) * blockSize)
+        ctx.lineTo(float(x) * blockSize, (float(y) + 0.5) * blockSize)
+        ctx.lineTo((float(x) + 0.5) * blockSize, (float(y) + 1.) * blockSize)
+    ctx.fill()
 
 let mutable state = Engine.initialState
 
@@ -55,18 +78,18 @@ let init() =
     let buttonNewGame = getById<Browser.HTMLButtonElement>("newGame")
     buttonNewGame.addEventListener_click(fun _ -> restart(); null)
 
-    let canvas = Browser.document.getElementsByTagName_canvas().[0]
+    let canvas = getById<Browser.HTMLCanvasElement>("canvas")
     canvas.width <- mapWidthPixel
     canvas.height <- mapHeightPixel
-    
+
     let ctx = canvas.getContext_2d()
     render ctx state
-    
+
     let rec update () =
         state <- Engine.advance state
         render ctx state
         Browser.window.setTimeout(update, 115) |> ignore
-    
+
     update ()
 
 init()
