@@ -60,8 +60,8 @@ let mutable state = Engine.initialState
 let getById<'T when 'T :> Browser.HTMLElement> id =
     Browser.document.getElementById(id) :?> 'T
 
-let restart() =
-    state <- Engine.initialState
+let restart () =
+    state <- initialState
 
 let init() =
     Browser.document.addEventListener_keyup(

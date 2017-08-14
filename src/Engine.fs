@@ -94,7 +94,10 @@ let advanceGameState gameState =
     | Dead -> gameState
     | Alive ->
         let (headPoint, headDir) = gameState.Snake.Head
-        let collided = List.exists (fun (p, _) -> p = (move headDir headPoint)) gameState.Snake.Tail
+        let collided =
+            gameState.Snake.Tail
+            |> List.map (fun (p, d) -> move d p)
+            |> List.exists (fun p -> p = (move headDir headPoint))
 
         if collided
         then { gameState with Life = Dead }
